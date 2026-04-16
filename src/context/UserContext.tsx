@@ -59,7 +59,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
             await updateDoc(userRef, { role: 'admin' });
           }
         }
-      } catch (error) {
+      } catch (error: any) {
+        toast.error(`User profile check failed: ${error.message || 'Unknown error'}`);
         handleFirestoreError(error, OperationType.WRITE, `users/${user.uid}`);
       }
     };
@@ -73,6 +74,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       setLoading(false);
     }, (error) => {
+      toast.error(`Failed to sync user profile: ${error.message}`);
       handleFirestoreError(error, OperationType.GET, `users/${user.uid}`);
     });
 

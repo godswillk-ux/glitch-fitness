@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import { toast } from 'sonner';
 
 interface AuthContextType {
   user: User | null;
@@ -27,8 +28,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login failed:', error);
+      if (error.code === 'auth/unauthorized-domain') {
+        toast.error('This domain is not authorized for login. Please check your Firebase console settings.');
+      } else if (error.code === 'auth/popup-closed-by-user') {
+        toast.error('Login popup was closed before completion.');
+      } else {
+        toast.error(`Login failed: ${error.message || 'Unknown error'}`);
+      }
       throw error;
     }
   };
