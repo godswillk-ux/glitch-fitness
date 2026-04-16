@@ -13,6 +13,7 @@ interface Review {
   id: string;
   productId: string;
   userId: string;
+  userEmail?: string;
   userName: string;
   rating: number;
   comment: string;
@@ -60,6 +61,7 @@ export const ReviewSection: React.FC<{ productId: string }> = ({ productId }) =>
       await addDoc(collection(db, 'reviews'), {
         productId,
         userId: user.uid,
+        userEmail: user.email,
         userName: user.displayName || 'Anonymous',
         rating,
         comment,
@@ -137,7 +139,15 @@ export const ReviewSection: React.FC<{ productId: string }> = ({ productId }) =>
           <div key={review.id} className="border-b pb-6 last:border-0">
             <div className="flex justify-between items-start mb-2">
               <div>
-                <p className="font-bold">{review.userName}</p>
+                <p className="font-bold flex items-center gap-2">
+                  {review.userName}
+                  {review.userEmail === 'godswillk116@gmail.com' && (
+                    <span className="flex items-center text-yellow-500 text-sm">
+                      <Star className="h-3 w-3 fill-current" />
+                      <span className="ml-1 text-muted-foreground text-[10px]">(Owner)</span>
+                    </span>
+                  )}
+                </p>
                 <div className="flex mt-1">
                   {[1, 2, 3, 4, 5].map((s) => (
                     <Star

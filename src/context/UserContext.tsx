@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { doc, onSnapshot, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
+import { doc, onSnapshot, setDoc, updateDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 import { db, OperationType, handleFirestoreError } from '@/lib/firebase';
 import { useAuth } from './AuthContext';
+import { toast } from 'sonner';
 
 export interface UserProfile {
   uid: string;
@@ -17,6 +18,7 @@ interface UserContextType {
   profile: UserProfile | null;
   loading: boolean;
   isSuspended: boolean;
+  updateProfile: (data: Partial<UserProfile>) => Promise<void>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -50,6 +52,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
             createdAt: serverTimestamp(),
           };
           await setDoc(userRef, newProfile);
+        } else {
+          // If user exists but is the owner and somehow not an admin, upgrade them
+          const data = docSnap.data() as UserProfile;
+          if (user.email === 'godswillk116@gmail.com' && data.role !== 'admin') {
+            await updateDoc(userRef, { role: 'admin' });
+          }
         }
       } catch (error) {
         handleFirestoreError(error, OperationType.WRITE, `users/${user.uid}`);
@@ -71,10 +79,21 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return unsubscribe;
   }, [user]);
 
+  const updateProfile = async (data: Partial<UserProfile>) => {
+    if (!user) return;
+    try {
+      const userRef = doc(db, 'users', user.uid);
+      await updateDoc(userRef, data);
+      toast.success('Profile updated successfully');
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `users/${user.uid}`);
+    }
+  };
+
   const isSuspended = !!profile?.suspended;
 
   return (
-    <UserContext.Provider value={{ profile, loading, isSuspended }}>
+    <UserContext.Provider value={{ profile, loading, isSuspended, updateProfile }}>
       {isSuspended ? (
         <div className="fixed inset-0 z-[9999] bg-background flex items-center justify-center p-4 text-center">
           <div className="max-w-md space-y-4">

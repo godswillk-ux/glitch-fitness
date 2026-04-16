@@ -96,26 +96,43 @@ service cloud.firestore {
     }
 
     function isValidOrder(data) {
-      return data.keys().hasAll(['userId', 'items', 'total', 'status', 'createdAt']) &&
+      return data.keys().hasAll(['userId', 'items', 'total', 'status', 'createdAt', 'shippingDetails']) &&
              data.userId == request.auth.uid &&
              data.items is list &&
              data.total is number && data.total >= 0 &&
              data.status in ['pending', 'processing', 'shipped', 'delivered'] &&
+             data.shippingDetails is map &&
              data.createdAt is timestamp;
     }
 
     function isValidReview(data) {
       return data.keys().hasAll(['productId', 'userId', 'userName', 'rating', 'comment', 'helpfulCount', 'createdAt']) &&
              data.userId == request.auth.uid &&
+             (!('userEmail' in data) || data.userEmail is string) &&
              data.rating is number && data.rating >= 1 && data.rating <= 5 &&
              data.comment is string && data.comment.size() < 1000 &&
              data.helpfulCount is number &&
              data.createdAt is timestamp;
     }
 
+    function isValidCart(data) {
+      return data.keys().hasAll(['userId', 'items']) &&
+             data.userId == request.auth.uid &&
+             data.items is list && data.items.size() <= 100;
+    }
+
+    function isValidSettings(data) {
+      return (!('backgroundImageUrl' in data) || data.backgroundImageUrl is string);
+    }
+
     // ===============================================================
     // Rules
     // ===============================================================
+
+    match /settings/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin() && isValidSettings(request.resource.data);
+    }
 
     match /users/{userId} {
       allow list: if isAdmin();
@@ -132,6 +149,11 @@ service cloud.firestore {
     match /wishlists/{userId} {
       allow read: if isOwner(userId);
       allow write: if isOwner(userId) && !isSuspended() && isValidWishlist(request.resource.data);
+    }
+
+    match /carts/{userId} {
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId) && !isSuspended() && isValidCart(request.resource.data);
     }
 
     match /orders/{orderId} {

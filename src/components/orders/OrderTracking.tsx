@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Package, Truck, CheckCircle, Clock } from 'lucide-react';
 import { motion } from 'motion/react';
 
+import { OrderReceiptDialog } from './OrderReceiptDialog';
+
 interface Order {
   id: string;
   userId: string;
@@ -107,7 +109,7 @@ export const OrderTracking = () => {
                   <div className="flex -space-x-2">
                     {order.items.slice(0, 3).map((item, i) => (
                       <div key={i} className="w-8 h-8 rounded-full border-2 border-background overflow-hidden bg-muted">
-                        <img src={item.imageURL} alt="" className="w-full h-full object-cover" />
+                        <img src={item.imageURL} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                       </div>
                     ))}
                     {order.items.length > 3 && (
@@ -116,6 +118,9 @@ export const OrderTracking = () => {
                       </div>
                     )}
                   </div>
+                </div>
+                <div className="mt-4 flex justify-end">
+                  <OrderReceiptDialog order={order} />
                 </div>
               </CardContent>
             </Card>

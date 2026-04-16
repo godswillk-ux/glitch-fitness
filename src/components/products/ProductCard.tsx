@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Heart, ShoppingCart, Star, Eye } from 'lucide-react';
 import { Product } from '@/types';
 import { useWishlist } from '@/hooks/useWishlist';
+import { useCart } from '@/hooks/useCart';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -15,8 +16,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ReviewSection } from './ReviewSection';
-import { collection, query, where, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db, OperationType, handleFirestoreError } from '@/lib/firebase';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 
@@ -26,6 +27,7 @@ interface ProductCardProps {
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { wishlist, toggleWishlist } = useWishlist();
+  const { addToCart } = useCart();
   const { user } = useAuth();
   const { t } = useTranslation();
   const [reviews, setReviews] = useState<any[]>([]);
@@ -43,25 +45,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     ? reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length
     : 0;
 
-  const handleCheckout = async () => {
-    if (!user) {
-      toast.error('Please sign in to purchase');
-      return;
-    }
-
-    try {
-      await addDoc(collection(db, 'orders'), {
-        userId: user.uid,
-        items: [product],
-        total: product.price,
-        status: 'pending',
-        trackingNumber: 'NX' + Math.random().toString(36).substring(2, 10).toUpperCase(),
-        createdAt: serverTimestamp(),
-      });
-      toast.success('Order placed successfully! Track it in your dashboard.');
-    } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, 'orders');
-    }
+  const handleAddToCart = async () => {
+    await addToCart(product.id, 1);
   };
 
   return (
@@ -95,9 +80,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <CardHeader className="p-4 pb-2">
           <div className="flex justify-between items-start gap-2">
             <Badge variant="outline" className="text-[10px] uppercase tracking-wider">{product.category}</Badge>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 bg-muted/50 px-2 py-1 rounded-md">
               <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
               <span className="text-xs font-bold">{averageRating > 0 ? averageRating.toFixed(1) : 'New'}</span>
+              {reviews.length > 0 && (
+                <span className="text-[10px] text-muted-foreground ml-1">({reviews.length})</span>
+              )}
             </div>
           </div>
           <CardTitle className="text-lg line-clamp-1 mt-1">{product.name}</CardTitle>
@@ -122,10 +110,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                   <img src={product.imageURL} alt={product.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                 </div>
                 <div className="space-y-4">
-                  <Badge>{product.category}</Badge>
+                  <div className="flex items-center justify-between">
+                    <Badge>{product.category}</Badge>
+                    <div className="flex items-center gap-1">
+                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                      <span className="text-sm font-bold">{averageRating > 0 ? averageRating.toFixed(1) : 'New'}</span>
+                      <span className="text-sm text-muted-foreground">({reviews.length} reviews)</span>
+                    </div>
+                  </div>
                   <p className="text-2xl font-bold">${product.price.toFixed(2)}</p>
                   <p className="text-muted-foreground leading-relaxed">{product.description}</p>
-                  <Button className="w-full gap-2" onClick={handleCheckout} disabled={product.stock <= 0}>
+                  <Button className="w-full gap-2" onClick={handleAddToCart} disabled={product.stock <= 0}>
                     <ShoppingCart className="h-4 w-4" />
                     {t('products.addToCart')}
                   </Button>
@@ -134,7 +129,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               <ReviewSection productId={product.id} />
             </DialogContent>
           </Dialog>
-          <Button className="w-full gap-2" disabled={product.stock <= 0} onClick={handleCheckout}>
+          <Button className="w-full gap-2" disabled={product.stock <= 0} onClick={handleAddToCart}>
             <ShoppingCart className="h-4 w-4" />
             {t('products.addToCart')}
           </Button>

@@ -1,11 +1,12 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Dumbbell, Heart, User, LogOut, Menu, ShieldCheck } from 'lucide-react';
+import { Dumbbell, Heart, User, LogOut, Menu, ShieldCheck, Star } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useUser } from '@/context/UserContext';
 import { Button } from '@/components/ui/button';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { ThemeToggle } from './ThemeToggle';
+import { CartSheet } from '../cart/CartSheet';
 import { useTranslation } from 'react-i18next';
 import {
   Sheet,
@@ -40,14 +41,18 @@ export const Navbar = () => {
           </div>
           {user ? (
             <>
+              <CartSheet />
               <Link to="/wishlist">
                 <Button variant="ghost" size="icon" className="relative">
                   <Heart className="h-5 w-5" />
                 </Button>
               </Link>
               <Link to="/dashboard">
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" className="relative">
                   <User className="h-5 w-5" />
+                  {profile?.email === 'godswillk116@gmail.com' && (
+                    <Star className="h-3 w-3 absolute top-1 right-1 fill-yellow-500 text-yellow-500" />
+                  )}
                 </Button>
               </Link>
               {profile?.role === 'admin' && (
