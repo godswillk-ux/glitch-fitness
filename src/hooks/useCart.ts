@@ -40,7 +40,7 @@ export const useCart = () => {
     return unsubscribe;
   }, [user]);
 
-  const addToCart = async (productId: string, quantity: number = 1) => {
+  const addToCart = async (productId: string, quantity: number = 1, maxStock?: number) => {
     if (!user) {
       toast.error('Please sign in to add to cart');
       return;
@@ -48,22 +48,27 @@ export const useCart = () => {
 
     try {
       const cartRef = doc(db, 'carts', user.uid);
-      const cartSnap = await getDoc(cartRef);
+      const currentItems = cart?.items || [];
+      let newItems = [...currentItems];
+      const existingItemIndex = newItems.findIndex(item => item.productId === productId);
       
-      let newItems: CartItem[] = [];
-      if (cartSnap.exists()) {
-        const currentCart = cartSnap.data() as Cart;
-        newItems = [...currentCart.items];
-        const existingItemIndex = newItems.findIndex(item => item.productId === productId);
-        
-        if (existingItemIndex >= 0) {
-          newItems[existingItemIndex].quantity += quantity;
-        } else {
-          newItems.push({ productId, quantity });
+      if (existingItemIndex >= 0) {
+        const newQuantity = newItems[existingItemIndex].quantity + quantity;
+        if (maxStock !== undefined && newQuantity > maxStock) {
+          toast.error(`Only ${maxStock} items available in stock`);
+          return;
         }
+        newItems[existingItemIndex].quantity = newQuantity;
       } else {
-        newItems = [{ productId, quantity }];
+        if (maxStock !== undefined && quantity > maxStock) {
+          toast.error(`Only ${maxStock} items available in stock`);
+          return;
+        }
+        newItems.push({ productId, quantity });
       }
+
+      // Optimistic update
+      setCart({ userId: user.uid, items: newItems });
 
       await setDoc(cartRef, {
         userId: user.uid,
@@ -72,6 +77,9 @@ export const useCart = () => {
       
       toast.success('Added to cart');
     } catch (error) {
+      // Revert on error
+      const cartSnap = await getDoc(doc(db, 'carts', user.uid));
+      if (cartSnap.exists()) setCart(cartSnap.data() as Cart);
       handleFirestoreError(error, OperationType.WRITE, `carts/${user.uid}`);
     }
   };
@@ -79,29 +87,41 @@ export const useCart = () => {
   const removeFromCart = async (productId: string) => {
     if (!user || !cart) return;
 
+    const previousItems = [...cart.items];
     try {
       const newItems = cart.items.filter(item => item.productId !== productId);
+      setCart({ ...cart, items: newItems });
+      
       await setDoc(doc(db, 'carts', user.uid), {
         userId: user.uid,
         items: newItems
       });
     } catch (error) {
+      setCart({ ...cart, items: previousItems });
       handleFirestoreError(error, OperationType.WRITE, `carts/${user.uid}`);
     }
   };
 
-  const updateQuantity = async (productId: string, quantity: number) => {
+  const updateQuantity = async (productId: string, quantity: number, maxStock?: number) => {
     if (!user || !cart) return;
+    if (maxStock !== undefined && quantity > maxStock) {
+      toast.error(`Only ${maxStock} items available in stock`);
+      return;
+    }
 
+    const previousItems = [...cart.items];
     try {
       const newItems = cart.items.map(item => 
         item.productId === productId ? { ...item, quantity } : item
       );
+      setCart({ ...cart, items: newItems });
+
       await setDoc(doc(db, 'carts', user.uid), {
         userId: user.uid,
         items: newItems
       });
     } catch (error) {
+      setCart({ ...cart, items: previousItems });
       handleFirestoreError(error, OperationType.WRITE, `carts/${user.uid}`);
     }
   };

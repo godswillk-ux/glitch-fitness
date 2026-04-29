@@ -49,6 +49,8 @@
         "userId": { "type": "string" },
         "items": { "type": "array", "items": { "type": "object" } },
         "total": { "type": "number" },
+        "discount": { "type": "number" },
+        "promoCode": { "type": "string" },
         "status": { "type": "string", "enum": ["pending", "processing", "shipped", "delivered"] },
         "trackingNumber": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" }
@@ -71,12 +73,29 @@
       },
       "required": ["productId", "userId", "rating", "comment"]
     },
+    "carts": {
+      "title": "Cart",
+      "description": "Shopping cart for a user",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "items": { "type": "array", "items": { 
+          "type": "object",
+          "properties": {
+            "productId": { "type": "string" },
+            "quantity": { "type": "number" }
+          }
+        } }
+      },
+      "required": ["userId", "items"]
+    },
     "settings": {
       "title": "Settings",
       "description": "Global website settings",
       "type": "object",
       "properties": {
-        "backgroundImageUrl": { "type": "string", "format": "uri" }
+        "backgroundImageUrl": { "type": "string", "format": "uri" },
+        "backgroundTheme": { "type": "string", "enum": ["default", "gold"] }
       }
     }
   },
@@ -100,6 +119,10 @@
     "/reviews/{reviewId}": {
       "schema": "reviews",
       "description": "Product reviews"
+    },
+    "/carts/{userId}": {
+      "schema": "carts",
+      "description": "User shopping carts"
     },
     "/settings/{document}": {
       "schema": "settings",

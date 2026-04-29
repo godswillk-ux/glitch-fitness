@@ -103,6 +103,8 @@ service cloud.firestore {
              data.userId == request.auth.uid &&
              data.items is list &&
              data.total is number && data.total >= 0 &&
+             (!('discount' in data) || data.discount is number) &&
+             (!('promoCode' in data) || (data.promoCode is string || data.promoCode == null)) &&
              data.status in ['pending', 'processing', 'shipped', 'delivered'] &&
              data.shippingDetails is map &&
              data.createdAt is timestamp;
@@ -125,7 +127,8 @@ service cloud.firestore {
     }
 
     function isValidSettings(data) {
-      return (!('backgroundImageUrl' in data) || data.backgroundImageUrl is string);
+      return (!('backgroundImageUrl' in data) || data.backgroundImageUrl is string) &&
+             (!('backgroundTheme' in data) || data.backgroundTheme in ['default', 'gold']);
     }
 
     function isValidHelpfulIncrement() {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Dumbbell, MessageSquare, Phone, Truck, RefreshCw, ShieldAlert } from 'lucide-react';
+import { ShoppingBag, MessageSquare, Phone, Truck, RefreshCw, ShieldAlert } from 'lucide-react';
 
 export const Footer = () => {
   return (
@@ -9,12 +9,20 @@ export const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
-              <Dumbbell className="h-6 w-6 text-primary" />
-              <span className="text-xl font-black tracking-tighter uppercase italic">GLITCH</span>
+              <ShoppingBag className="h-6 w-6 text-primary" />
+              <span className="text-xl font-black tracking-tighter uppercase italic">UJAYKRIS</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              Premium fitness gear for the dedicated. Elevate your workout with GLITCH.
+              Premium fashion and apparel. Elevate your style with UJAYKRIS.
             </p>
+          </div>
+
+          <div>
+            <h4 className="font-bold mb-4">Company</h4>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li><Link to="/our-story" className="hover:text-primary transition-colors">Our Story</Link></li>
+              <li><Link to="/reviews" className="hover:text-primary transition-colors">User Reviews</Link></li>
+            </ul>
           </div>
 
           <div>
@@ -67,11 +75,8 @@ export const Footer = () => {
 
         <div className="border-t mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} GLITCH Fitness & Gear. All rights reserved.
+            © {new Date().getFullYear()} UJAYKRIS Fashion Store. All rights reserved.
           </p>
-          <div className="flex gap-6 text-xs text-muted-foreground">
-            <Link to="/reviews" className="hover:text-primary transition-colors">User Reviews</Link>
-          </div>
         </div>
       </div>
     </footer>

@@ -117,6 +117,22 @@ export const AdminPanel = () => {
     }
   };
 
+  const handleBulkDelete = async () => {
+    if (!products || products.length === 0) return;
+    if (!confirm(`WARNING: This will delete ALL ${products.length} products. This action cannot be undone. Are you sure?`)) return;
+    
+    toast.loading('Resetting store inventory...');
+    try {
+      const deletePromises = products.map(p => deleteDoc(doc(db, 'products', p.id)));
+      await Promise.all(deletePromises);
+      toast.dismiss();
+      toast.success('Gallery cleared. Store is ready for new fashion products!');
+    } catch (error) {
+      toast.dismiss();
+      handleFirestoreError(error, OperationType.DELETE, `products/bulk`);
+    }
+  };
+
   if (productsLoading || ordersLoading || usersLoading) return <div>Loading...</div>;
 
   return (
@@ -194,6 +210,16 @@ export const AdminPanel = () => {
         </TabsContent>
 
         <TabsContent value="products" className="space-y-4 mt-6">
+          <div className="flex justify-between items-center bg-destructive/10 p-4 rounded-lg border border-destructive/20">
+            <div>
+              <h3 className="font-bold text-destructive">Danger Zone</h3>
+              <p className="text-xs text-muted-foreground">Reset current inventory to 0 for the new fashion store launch.</p>
+            </div>
+            <Button variant="destructive" size="sm" onClick={handleBulkDelete} className="gap-2">
+              <Trash2 className="h-4 w-4" /> Clear All Products
+            </Button>
+          </div>
+
           <div className="flex justify-end">
             <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
               <DialogTrigger render={<Button className="gap-2" />}>
@@ -334,7 +360,7 @@ export const AdminPanel = () => {
                       )}
                     </TableCell>
                     <TableCell className="text-right">
-                      {u.email !== 'godswillk116@gmail.com' && (
+                      {(u.email !== 'godswillk116@gmail.com' && u.email !== 'uokide@yahoo.com') && (
                         <Button 
                           variant={u.suspended ? "secondary" : "destructive"} 
                           size="sm"

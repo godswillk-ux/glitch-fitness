@@ -47,7 +47,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
             email: user.email || '',
             displayName: user.displayName || '',
             photoURL: user.photoURL || '',
-            role: user.email === 'godswillk116@gmail.com' ? 'admin' : 'customer',
+            role: (user.email === 'godswillk116@gmail.com' || user.email === 'uokide@yahoo.com') ? 'admin' : 'customer',
             suspended: false,
             createdAt: serverTimestamp(),
           };
@@ -55,7 +55,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } else {
           // If user exists but is the owner and somehow not an admin, upgrade them
           const data = docSnap.data() as UserProfile;
-          if (user.email === 'godswillk116@gmail.com' && data.role !== 'admin') {
+          if ((user.email === 'godswillk116@gmail.com' || user.email === 'uokide@yahoo.com') && data.role !== 'admin') {
             await updateDoc(userRef, { role: 'admin' });
           }
         }
@@ -99,7 +99,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       {isSuspended ? (
         <div className="fixed inset-0 z-[9999] bg-background flex items-center justify-center p-4 text-center">
           <div className="max-w-md space-y-4">
-            <h1 className="text-4xl font-black text-destructive uppercase italic tracking-tighter">GLITCH: ACCESS DENIED</h1>
+            <h1 className="text-4xl font-black text-destructive uppercase italic tracking-tighter">UJAYKRIS: ACCESS DENIED</h1>
             <p className="text-muted-foreground">Your account has been suspended by the administrator. Please contact support if you believe this is a mistake.</p>
             <button 
               onClick={() => logout()}

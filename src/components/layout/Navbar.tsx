@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Dumbbell, Heart, User, LogOut, Menu, ShieldCheck, Star } from 'lucide-react';
+import { ShoppingBag, Heart, User, LogOut, Menu, ShieldCheck, Star } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useUser } from '@/context/UserContext';
 import { Button } from '@/components/ui/button';
@@ -25,11 +25,12 @@ export const Navbar = () => {
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-6">
           <Link to="/" className="flex items-center space-x-2">
-            <Dumbbell className="h-6 w-6 text-primary" />
-            <span className="text-xl font-black tracking-tighter uppercase italic">GLITCH</span>
+            <ShoppingBag className="h-6 w-6 text-primary" />
+            <span className="text-xl font-black tracking-tighter uppercase italic">UJAYKRIS</span>
           </Link>
           <div className="hidden md:flex gap-6">
-            <Link to="/" className="text-sm font-medium transition-colors hover:text-primary">{t('nav.shop')}</Link>
+            <Link to="/shop" className="text-sm font-medium transition-colors hover:text-primary">{t('nav.shop')}</Link>
+            <Link to="/our-story" className="text-sm font-medium transition-colors hover:text-primary">{t('home.learnMore')}</Link>
             <Link to="/categories" className="text-sm font-medium transition-colors hover:text-primary">{t('nav.categories')}</Link>
           </div>
         </div>
@@ -50,7 +51,7 @@ export const Navbar = () => {
               <Link to="/dashboard">
                 <Button variant="ghost" size="icon" className="relative">
                   <User className="h-5 w-5" />
-                  {profile?.email === 'godswillk116@gmail.com' && (
+                  {(profile?.email === 'godswillk116@gmail.com' || profile?.email === 'uokide@yahoo.com') && (
                     <Star className="h-3 w-3 absolute top-1 right-1 fill-yellow-500 text-yellow-500" />
                   )}
                 </Button>
@@ -80,7 +81,8 @@ export const Navbar = () => {
                   <LanguageSwitcher />
                   <ThemeToggle />
                 </div>
-                <Link to="/" className="text-lg font-medium">{t('nav.shop')}</Link>
+                <Link to="/shop" className="text-lg font-medium">{t('nav.shop')}</Link>
+                <Link to="/our-story" className="text-lg font-medium">{t('home.learnMore')}</Link>
                 <Link to="/categories" className="text-lg font-medium">{t('nav.categories')}</Link>
                 {user && (
                   <>

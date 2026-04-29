@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 
 export interface GlobalSettings {
   backgroundImageUrl?: string;
+  backgroundTheme?: 'default' | 'gold';
 }
 
 export const useSettings = () => {

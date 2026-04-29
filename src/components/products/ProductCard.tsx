@@ -46,7 +46,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     : 0;
 
   const handleAddToCart = async () => {
-    await addToCart(product.id, 1);
+    await addToCart(product.id, 1, product.stock);
   };
 
   return (
@@ -63,14 +63,27 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
             referrerPolicy="no-referrer"
           />
-          <Button
-            variant="secondary"
-            size="icon"
-            className={`absolute top-2 right-2 rounded-full shadow-md transition-colors ${isWishlisted ? 'text-red-500' : 'text-muted-foreground'}`}
-            onClick={() => toggleWishlist(product.id)}
+          <motion.div
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            className="absolute top-2 right-2 z-10"
           >
-            <Heart className={`h-5 w-5 ${isWishlisted ? 'fill-current' : ''}`} />
-          </Button>
+            <Button
+              variant="secondary"
+              size="icon"
+              className={`rounded-full shadow-md transition-colors ${isWishlisted ? 'text-red-500 border-red-100 bg-red-50 hover:bg-red-100' : 'text-muted-foreground'}`}
+              onClick={() => toggleWishlist(product.id)}
+            >
+              <motion.div
+                key={isWishlisted ? 'active' : 'inactive'}
+                initial={{ scale: 1 }}
+                animate={isWishlisted ? { scale: [1, 1.4, 1] } : { scale: 1 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+              >
+                <Heart className={`h-5 w-5 ${isWishlisted ? 'fill-current' : ''}`} />
+              </motion.div>
+            </Button>
+          </motion.div>
           {product.stock <= 0 && (
             <div className="absolute inset-0 bg-background/60 flex items-center justify-center">
               <Badge variant="destructive" className="text-lg">{t('products.outOfStock')}</Badge>

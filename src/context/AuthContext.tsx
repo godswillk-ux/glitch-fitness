@@ -31,7 +31,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (error: any) {
       console.error('Login failed:', error);
       if (error.code === 'auth/unauthorized-domain') {
-        toast.error('This domain is not authorized for login. Please check your Firebase console settings.');
+        toast.error(`Domain "${window.location.hostname}" is not authorized for login. Please add it to your Firebase Console settings.`);
       } else if (error.code === 'auth/popup-closed-by-user') {
         toast.error('Login popup was closed before completion.');
       } else {
